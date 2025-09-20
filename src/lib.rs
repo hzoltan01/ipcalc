@@ -58,7 +58,7 @@ impl Ipv4Netmask {
         }
     }
 
-    pub fn from_bytes(bytes: [u8; 4]) -> Result<Self, &'static str> {
+    pub const fn from_bytes(bytes: [u8; 4]) -> Result<Self, &'static str> {
         Self::from_integer(u32::from_be_bytes(bytes))
     }
 }
