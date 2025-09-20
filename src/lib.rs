@@ -33,6 +33,10 @@ impl Ipv4Netmask {
         u32::from_be_bytes(self.to_bytes())
     }
 
+    pub const fn new(a: u8, b: u8, c: u8, d: u8) -> Result<Ipv4Netmask, &'static str> {
+        Self::from_bytes([a, b, c, d])
+    }
+
     pub const fn from_cidr(cidr: u8) -> Result<Self, &'static str> {
         if cidr > 32 {
             return Err("CIDR must be between 0 and 32!");
@@ -71,6 +75,30 @@ impl Ipv4Netmask {
     }
 }
 
+impl TryFrom<u8> for Ipv4Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::from_cidr(value)
+    }
+}
+
+impl TryFrom<u32> for Ipv4Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        Self::from_bits(value)
+    }
+}
+
+impl TryFrom<[u8; 4]> for Ipv4Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
+        Self::from_bytes(value)
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Ipv6Netmask;
 
@@ -96,6 +124,14 @@ impl Ipv4Network {
 
     pub const fn new(address: Ipv4Addr, netmask: Ipv4Netmask) -> Self {
         Self { address, netmask }
+    }
+
+    pub fn from_hosts(first: Ipv4Addr, last: Ipv4Addr) -> Self {
+        let xor_res = first.to_bits() ^ last.to_bits();
+        let cidr = u8::try_from(xor_res.leading_zeros()).unwrap();
+
+        let mask = Ipv4Netmask::from_cidr(cidr).unwrap();
+        Self::new(first, mask)
     }
 
     pub const fn network_addr(&self) -> Ipv4Addr {
