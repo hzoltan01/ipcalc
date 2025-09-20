@@ -61,6 +61,14 @@ impl Ipv4Netmask {
     pub const fn from_bytes(bytes: [u8; 4]) -> Result<Self, &'static str> {
         Self::from_integer(u32::from_be_bytes(bytes))
     }
+
+    pub const fn host_num(&self) -> u64 {
+        if self.cidr >= 31 {
+            return 0;
+        }
+
+        2u64.pow(32 - self.cidr as u32) - 2
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -104,6 +112,22 @@ impl Ipv4Network {
 
         let network_bits = addr_bits | mask_bits;
         Ipv4Addr::from_bits(network_bits)
+    }
+
+    pub fn min_host(&self) -> Option<Ipv4Addr> {
+        match self.netmask.cidr {
+            32 => None,
+            31 => Some(self.network_addr()),
+            _ => Some(Ipv4Addr::from_bits(self.network_addr().to_bits() + 1)),
+        }
+    }
+
+    pub const fn max_host(&self) -> Option<Ipv4Addr> {
+        match self.netmask.cidr {
+            32 => None,
+            31 => Some(self.broadcast_addr()),
+            _ => Some(Ipv4Addr::from_bits(self.broadcast_addr().to_bits() - 1)),
+        }
     }
 }
 pub struct Ipv6Network;
