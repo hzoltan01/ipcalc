@@ -40,7 +40,7 @@ impl Ipv4Netmask {
         Ok(Self { cidr })
     }
 
-    pub const fn from_integer(bytes: u32) -> Result<Self, &'static str> {
+    pub const fn from_bits(bytes: u32) -> Result<Self, &'static str> {
         const fn validate(bytes: u32) -> bool {
             if bytes == 0 || bytes == u32::MAX {
                 return true;
@@ -59,7 +59,7 @@ impl Ipv4Netmask {
     }
 
     pub const fn from_bytes(bytes: [u8; 4]) -> Result<Self, &'static str> {
-        Self::from_integer(u32::from_be_bytes(bytes))
+        Self::from_bits(u32::from_be_bytes(bytes))
     }
 
     pub const fn host_num(&self) -> u64 {
