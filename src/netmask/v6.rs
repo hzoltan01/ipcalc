@@ -1,4 +1,6 @@
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+use std::fmt::{Display, Debug};
+
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Ipv6Netmask {
     cidr: u8,
 }
@@ -71,3 +73,48 @@ impl Ipv6Netmask {
         2u128.pow(128 - self.cidr as u32) - 2
     }
 }
+
+impl TryFrom<u8> for Ipv6Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::from_cidr(value)
+    }
+}
+
+impl TryFrom<u128> for Ipv6Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: u128) -> Result<Self, Self::Error> {
+        Self::from_bits(value)
+    }
+}
+
+impl TryFrom<[u8; 16]> for Ipv6Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: [u8; 16]) -> Result<Self, Self::Error> {
+        Self::from_octets(value)
+    }
+}
+
+impl TryFrom<[u16; 8]> for Ipv6Netmask {
+    type Error = &'static str;
+
+    fn try_from(value: [u16; 8]) -> Result<Self, Self::Error> {
+        Self::from_hextets(value)
+    }
+}
+
+impl Display for Ipv6Netmask {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.pad(&format!("/{}", self.cidr))
+    }
+}
+
+impl Debug for Ipv6Netmask {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self, f)
+    }
+}
+
