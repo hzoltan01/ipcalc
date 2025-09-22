@@ -1,11 +1,4 @@
-use core::fmt::Display;
-use std::fmt::{self, Debug};
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Netmask {
-    V4(Ipv4Netmask),
-    V6(Ipv6Netmask),
-}
+use std::fmt::{Display, Debug};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Ipv4Netmask {
@@ -13,12 +6,8 @@ pub struct Ipv4Netmask {
 }
 
 impl Ipv4Netmask {
-    pub const fn cidr(&self) -> u8 { 
+    pub const fn cidr(&self) -> u8 {
         self.cidr
-    }
-
-    pub const fn as_cidr(&self) -> &u8 {
-        &self.cidr
     }
 
     pub const fn octets(&self) -> [u8; 4] {
@@ -39,7 +28,7 @@ impl Ipv4Netmask {
     }
 
     pub const fn new(a: u8, b: u8, c: u8, d: u8) -> Result<Ipv4Netmask, &'static str> {
-        Self::from_bytes([a, b, c, d])
+        Self::from_octets([a, b, c, d])
     }
 
     pub const fn from_cidr(cidr: u8) -> Result<Self, &'static str> {
@@ -67,7 +56,7 @@ impl Ipv4Netmask {
         }
     }
 
-    pub const fn from_bytes(bytes: [u8; 4]) -> Result<Self, &'static str> {
+    pub const fn from_octets(bytes: [u8; 4]) -> Result<Self, &'static str> {
         Self::from_bits(u32::from_be_bytes(bytes))
     }
 
@@ -100,7 +89,7 @@ impl TryFrom<[u8; 4]> for Ipv4Netmask {
     type Error = &'static str;
 
     fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        Self::from_bytes(value)
+        Self::from_octets(value)
     }
 }
 
@@ -112,22 +101,7 @@ impl Display for Ipv4Netmask {
 
 impl Debug for Ipv4Netmask {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt::Display::fmt(&self, f)
+        Display::fmt(&self, f)
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct Ipv6Netmask {
-    cidr: u128,
-}
-
-impl Ipv6Netmask {
-    pub const fn cidr(&self) -> u128 {
-        self.cidr
-    }
-
-    pub const fn as_cidr(&self) -> &u128 {
-        &self.cidr
-    }
-
-}
